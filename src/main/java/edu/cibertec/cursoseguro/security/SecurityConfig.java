@@ -2,7 +2,10 @@ package edu.cibertec.cursoseguro.security;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
+import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.password.NoOpPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
@@ -23,6 +26,8 @@ public class SecurityConfig {
                 .logout(logout -> logout.permitAll());
     return http.build();
     */
+        //Permisos por rutas específicas y por ROL
+        /*
         http.csrf(csrf -> csrf.disable())
                 .authorizeHttpRequests( auth -> auth
                         .requestMatchers("/cursoGrabar").hasRole("ADMIN")
@@ -32,6 +37,19 @@ public class SecurityConfig {
                 .formLogin(form -> form.permitAll())
                 .logout(logout -> logout.permitAll());
         return http.build();
+        */
+
+        http.sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS)
+        ).csrf(csrf -> csrf.disable())
+                .authorizeHttpRequests(auth -> auth
+                        .requestMatchers(HttpMethod.DELETE, "/cursos/*").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.POST,"/cursos*").hasRole("ADMIN")
+                        .requestMatchers("/**").permitAll()
+                )
+                .httpBasic(Customizer.withDefaults());
+        return http.build();
+
+
     }
 
 

@@ -6,12 +6,17 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.Banner;
+import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.*;
+import org.springframework.web.server.ResponseStatusException;
 import org.springframework.web.servlet.ModelAndView;
 
-@Controller
+import java.util.List;
+
+@RestController
+@RequestMapping("/cursos")
 public class CursoController {
 
     Logger logger = LoggerFactory.getLogger(CursoController.class);
@@ -19,31 +24,25 @@ public class CursoController {
     @Autowired
     private CursoService cursoService;
 
-    @RequestMapping("/")
-    public String listar(){
-        return "redirect:/cursoListar";
+    @GetMapping
+    public List<CursoEntity> listarTodosCursos(){
+        return cursoService.listarTodos();
     }
 
-    @RequestMapping("cursoListar")
-    public ModelAndView mostrarCurso(){
-        logger.debug("Listando los cursos");
-        return new ModelAndView("curso", "lista",cursoService.listarTodos());
+    @PostMapping
+    public void insertarCurso(@RequestBody CursoEntity ce){
+        try {
+            cursoService.insertar(ce);
+        }catch (DataIntegrityViolationException e){
+            throw new ResponseStatusException(HttpStatus.UNPROCESSABLE_ENTITY,"Curso no pudo ser creado",null);
+        }
     }
 
-    @RequestMapping("cursoGrabar")
-    public ModelAndView grabarCurso(CursoEntity ce){
-        logger.info("Anotesde insertar un curso");
-        cursoService.insertar(ce);
-        logger.warn("despues de insertar curso");
-        return new ModelAndView("redirect:cursoListar");
-    }
-
-    @RequestMapping("cursoEliminar")
-    public ModelAndView eliminarCurso(@RequestParam("codigo") int codigo){
-        logger.info("Antes de eliminar un curso");
+    @DeleteMapping("/{id}")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void eliminarCurso(@PathVariable("id") int codigo){
         cursoService.eliminar(codigo);
-        logger.warn("despues de eliminar un curso");
-        return new ModelAndView("redirect:cursoListar");
     }
+
 
 }
