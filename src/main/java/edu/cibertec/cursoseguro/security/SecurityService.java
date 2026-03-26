@@ -24,7 +24,7 @@ public class SecurityService implements UserDetailsService {
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
         UsuarioEntity ue = urepo.findById(username).get();
         List<GrantedAuthority> roles = new ArrayList<>();
-        roles.add(new SimpleGrantedAuthority("ROLE_USER"));
+        roles.add(new SimpleGrantedAuthority("ROLE_ADMIN"));
         UserDetails udet = new User(ue.getUsuario(), ue.getClave(), roles);
         return udet;
     }
